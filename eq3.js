@@ -61,13 +61,13 @@ module.exports = function (RED) {
 		var node = this;
 		node.msg_list = []
 		node.running = false
-
-		let deviceMAC = config.mac;
+		node.mac = config.mac.trim()
 
 		//console.log("config:",config);
 		node.on('input', function (msg, send, done) {
 			//push msg to buffer
 			node.msg_list.push({msg, send, done})
+			node.status({ fill: "yellow", shape: "dot", text: "working..." + node.msg_list.length + " queued" });
 			//check if currently processing other msg
 			if(!node.running){
 				node.running = true
@@ -92,6 +92,7 @@ module.exports = function (RED) {
 			send = send || function () { node.send.apply(node, arguments) }
 			done = done || function () { if (arguments.length > 0) node.error.apply(node, arguments) }
 
+			var deviceMAC = node.mac
 			if ("mac" in msg) {
 				deviceMAC = msg.mac;
 			}
@@ -119,7 +120,7 @@ module.exports = function (RED) {
 
 			//deviceMAC = deviceMAC.toUpperCase();
 
-			node.status({ fill: "yellow", shape: "dot", text: "Connecting ..." });
+			node.status({ fill: "yellow", shape: "dot", text: "working..." + node.msg_list.length + " queued" });
 			if (!expect) {
 				try {
 					expect = execFileSync("which", ["expect"], { encoding: "utf8" }).trim();
